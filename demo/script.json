@@ -1,0 +1,7 @@
+{
+  "beats": [
+    { "beat": "Order Placed", "text": "It started with one click." },
+    { "beat": "Package Arrival", "text": "Then it showed up at my door." },
+    { "beat": "Unboxing", "text": "Let's see what's inside." }
+  ]
+}

@@ -1,0 +1,489 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ClipForge</title>
+<style>
+  :root {
+    --bg: #0b0b0f;
+    --panel: #16161d;
+    --border: #2a2a35;
+    --text: #f2f2f5;
+    --muted: #9a9aa8;
+    --accent: #7c5cff;
+    --accent-2: #ff5c8a;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: radial-gradient(circle at 20% 0%, #1c1730 0%, var(--bg) 55%);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 16px;
+  }
+  .app {
+    width: 100%;
+    max-width: 980px;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  @media (min-width: 860px) {
+    .app { grid-template-columns: 1.1fr 0.9fr; align-items: start; }
+  }
+  header.hero {
+    grid-column: 1 / -1;
+    text-align: center;
+    margin-bottom: 4px;
+  }
+  header.hero .badge {
+    display: inline-block;
+    font-size: 12px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    border-radius: 999px;
+    padding: 4px 12px;
+    margin-bottom: 14px;
+  }
+  header.hero h1 {
+    font-size: 2.1rem;
+    margin: 0 0 8px;
+    background: linear-gradient(90deg, #fff, #c9c1ff);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  header.hero p {
+    color: var(--muted);
+    margin: 0;
+    font-size: .95rem;
+  }
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+  }
+  label {
+    display: block;
+    font-size: .8rem;
+    color: var(--muted);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+  }
+  textarea {
+    width: 100%;
+    min-height: 96px;
+    resize: vertical;
+    background: #0e0e14;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-size: .95rem;
+    padding: 12px 14px;
+    font-family: inherit;
+  }
+  textarea:focus { outline: 2px solid var(--accent); border-color: transparent; }
+  .clip-order {
+    margin: 18px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .clip-order .step {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: .85rem;
+    color: var(--muted);
+    transition: color .2s ease;
+  }
+  .clip-order .step .dot {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: #232333;
+    border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: .7rem;
+    color: var(--text);
+    flex-shrink: 0;
+    margin-top: 1px;
+    transition: background .2s ease, border-color .2s ease, transform .2s ease;
+  }
+  .clip-order .step-msg {
+    font-size: .78rem;
+    color: var(--accent);
+    min-height: 0;
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: max-height .25s ease, opacity .25s ease, margin-top .25s ease;
+  }
+  .clip-order .step.active { color: var(--text); }
+  .clip-order .step.active .dot {
+    background: var(--accent);
+    border-color: var(--accent);
+    transform: scale(1.1);
+  }
+  .clip-order .step.active .step-msg {
+    max-height: 40px;
+    opacity: 1;
+    margin-top: 3px;
+  }
+  .clip-order .step.done .dot {
+    background: #1d3b2a;
+    border-color: #2f6b47;
+    color: #6ee7a5;
+  }
+  .clip-order .step.done .step-msg {
+    color: #6ee7a5;
+  }
+  .dot .num, .dot .check { display: block; }
+  .dot .check { display: none; }
+  .clip-order .step.done .dot .num { display: none; }
+  .clip-order .step.done .dot .check { display: block; }
+  button#generate {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 10px;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    color: white;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity .15s ease, transform .1s ease;
+  }
+  button#generate:hover { opacity: .92; }
+  button#generate:active { transform: scale(.99); }
+  button#generate:disabled { opacity: .55; cursor: not-allowed; }
+  .status {
+    margin-top: 14px;
+    font-size: .85rem;
+    color: var(--muted);
+    min-height: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .spinner {
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    animation: spin .8s linear infinite;
+    display: none;
+  }
+  .status.loading .spinner { display: inline-block; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .preview {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+  .preview .frame {
+    width: 100%;
+    max-width: 320px;
+    aspect-ratio: 9 / 16;
+    background: #000;
+    border-radius: 18px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+  .preview .frame video {
+    width: 100%; height: 100%;
+    object-fit: cover;
+  }
+  .preview .placeholder {
+    color: var(--muted);
+    font-size: .85rem;
+    padding: 24px;
+  }
+  .preview .caption {
+    margin-top: 12px;
+    font-size: .8rem;
+    color: var(--muted);
+  }
+  [hidden] { display: none !important; }
+
+  .upload-zone {
+    border: 1.5px dashed var(--border);
+    border-radius: 12px;
+    padding: 18px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color .15s ease, background .15s ease;
+  }
+  .upload-zone:hover, .upload-zone.dragover {
+    border-color: var(--accent);
+    background: rgba(124, 92, 255, 0.06);
+  }
+  .upload-zone.disabled {
+    cursor: not-allowed;
+    opacity: .55;
+  }
+  .upload-zone.disabled:hover, .upload-zone.disabled.dragover {
+    border-color: var(--border);
+    background: none;
+  }
+  .upload-zone input { display: none; }
+  .upload-zone .hint {
+    color: var(--muted);
+    font-size: .82rem;
+    margin-top: 4px;
+  }
+  .upload-zone .icon { font-size: 1.4rem; }
+  .upload-disabled-msg {
+    color: var(--accent-2);
+  }
+  .footage-note {
+    margin-top: 12px;
+    font-size: .78rem;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+  .clip-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-top: 18px;
+  }
+  @media (max-width: 640px) {
+    .clip-grid { grid-template-columns: 1fr; }
+  }
+  .clip-tile { text-align: center; }
+  .clip-tile .tile-frame {
+    width: 100%;
+    aspect-ratio: 9 / 16;
+    background: #000;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    position: relative;
+  }
+  .clip-tile video {
+    width: 100%; height: 100%;
+    object-fit: cover;
+  }
+  .clip-tile .tile-label {
+    margin-top: 8px;
+    font-size: .78rem;
+    color: var(--muted);
+  }
+  .clip-tile .tile-label b { color: var(--text); }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="hero">
+    <span class="badge">ClipForge &middot; Demo</span>
+    <h1>Turn a script into a rough cut</h1>
+    <p>NPU-tagged clips + a script go in. A matched, edited rough cut comes out.</p>
+  </header>
+
+  <section class="panel" style="grid-column: 1 / -1;">
+    <label>Your footage</label>
+    <div class="upload-zone disabled" id="upload-zone">
+      <div class="icon">&#8593;</div>
+      <div>Click or drop video files to upload</div>
+      <div class="hint">order_placing &rarr; order_received &rarr; unboxing</div>
+    </div>
+    <p class="footage-note upload-disabled-msg" id="upload-disabled-msg" hidden>
+      Uploads are disabled &mdash; this is a demo build, so no new videos can be
+      added. The sample footage below is fixed and is what Generate always uses.
+    </p>
+    <p class="footage-note" id="footage-note">
+      Showing the sample footage below, the same footage the generated rough
+      cut below is built from.
+    </p>
+
+    <div class="clip-grid" id="clip-grid">
+      <div class="clip-tile">
+        <div class="tile-frame">
+          <video src="raw/order_placing.mp4" muted loop playsinline controls></video>
+        </div>
+        <div class="tile-label"><b>1. Order Placed</b></div>
+      </div>
+      <div class="clip-tile">
+        <div class="tile-frame">
+          <video src="raw/order_received.mp4" muted loop playsinline controls></video>
+        </div>
+        <div class="tile-label"><b>2. Package Arrival</b></div>
+      </div>
+      <div class="clip-tile">
+        <div class="tile-frame">
+          <video src="raw/unboxing.mp4" muted loop playsinline controls></video>
+        </div>
+        <div class="tile-label"><b>3. Unboxing</b></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <label for="prompt">What should ClipForge do?</label>
+    <textarea id="prompt">- Merge these 3 videos
+- Resize all videos to mobile dimensions
+- Add some music related to it
+- Add subtitles for each clip's action</textarea>
+
+    <div class="clip-order" id="clip-order">
+      <div class="step" data-step="0">
+        <span class="dot"><span class="num">1</span><span class="check">&#10003;</span></span>
+        <div class="step-text">
+          <div>Order placed &mdash; your hook plays here</div>
+          <div class="step-msg"></div>
+        </div>
+      </div>
+      <div class="step" data-step="1">
+        <span class="dot"><span class="num">2</span><span class="check">&#10003;</span></span>
+        <div class="step-text">
+          <div>Package arrival &mdash; matched automatically</div>
+          <div class="step-msg"></div>
+        </div>
+      </div>
+      <div class="step" data-step="2">
+        <span class="dot"><span class="num">3</span><span class="check">&#10003;</span></span>
+        <div class="step-text">
+          <div>Unboxing &mdash; matched automatically</div>
+          <div class="step-msg"></div>
+        </div>
+      </div>
+    </div>
+
+    <button id="generate">Generate rough cut</button>
+    <div id="status" class="status"><span class="spinner"></span><span id="status-text"></span></div>
+  </section>
+
+  <section class="panel preview">
+    <div class="frame">
+      <div class="placeholder" id="placeholder">Your rough cut will appear here</div>
+      <video id="video" controls playsinline></video>
+    </div>
+    <div class="caption">Tagged clips &rarr; rule-based matcher &rarr; ffmpeg render</div>
+  </section>
+</div>
+
+<script>
+// Static build: no backend. The rough cut below was rendered once (offline,
+// via demo/run_demo.py) and bundled as output/rough_cut.mp4 -- Generate
+// plays the same one-by-one matching animation as the live demo, then
+// reveals that pre-rendered file, instead of calling a server.
+const OUTPUT_VIDEO_URL = 'output/rough_cut.mp4';
+
+const btn = document.getElementById('generate');
+const promptEl = document.getElementById('prompt');
+const statusEl = document.getElementById('status');
+const statusText = document.getElementById('status-text');
+const video = document.getElementById('video');
+const placeholder = document.getElementById('placeholder');
+
+// -- Upload zone: disabled by design. This is a demo build, so no new
+// footage can actually be added -- clicking or dropping onto it just
+// explains that, rather than opening a file picker.
+const uploadZone = document.getElementById('upload-zone');
+const uploadDisabledMsg = document.getElementById('upload-disabled-msg');
+
+function showUploadDisabledNotice() {
+  uploadDisabledMsg.hidden = false;
+  uploadZone.classList.add('dragover');
+  setTimeout(() => uploadZone.classList.remove('dragover'), 400);
+}
+
+uploadZone.addEventListener('click', showUploadDisabledNotice);
+['dragover', 'dragenter', 'drop'].forEach(evt =>
+  uploadZone.addEventListener(evt, e => {
+    e.preventDefault();
+    showUploadDisabledNotice();
+  })
+);
+
+// -- Per-step progress: lights up "Order placed / Package arrival /
+// Unboxing" one at a time with a short static message, so Generate reads
+// like a real pipeline working through each clip rather than one spinner.
+const steps = Array.from(document.querySelectorAll('#clip-order .step'));
+const STEP_MESSAGES = [
+  'Matched to order_placing.mp4',
+  'Matched to order_received.mp4 — resized to mobile dimensions',
+  'Matched to unboxing.mp4 — subtitle added',
+];
+const STEP_INTERVAL_MS = 900;
+
+function resetSteps() {
+  steps.forEach(s => {
+    s.classList.remove('active', 'done');
+    s.querySelector('.step-msg').textContent = '';
+  });
+}
+
+function runStepper() {
+  resetSteps();
+  let i = 0;
+  function activateNext() {
+    if (i > 0) steps[i - 1].classList.replace('active', 'done');
+    if (i >= steps.length) return false;
+    steps[i].classList.add('active');
+    steps[i].querySelector('.step-msg').textContent = STEP_MESSAGES[i];
+    i += 1;
+    return true;
+  }
+  activateNext();
+  const timer = setInterval(() => {
+    if (!activateNext()) clearInterval(timer);
+  }, STEP_INTERVAL_MS);
+  return {
+    finish() {
+      clearInterval(timer);
+      steps.forEach((s, idx) => {
+        s.classList.remove('active');
+        s.classList.add('done');
+        if (!s.querySelector('.step-msg').textContent) {
+          s.querySelector('.step-msg').textContent = STEP_MESSAGES[idx];
+        }
+      });
+    },
+  };
+}
+
+async function generate() {
+  const prompt = promptEl.value.trim();
+  if (!prompt) { promptEl.focus(); return; }
+
+  btn.disabled = true;
+  statusEl.classList.add('loading');
+  video.hidden = true;
+  placeholder.hidden = false;
+  statusText.textContent = 'Generating...';
+  const stepper = runStepper();
+  const minVisibleMs = steps.length * STEP_INTERVAL_MS; // let the one-by-one reveal play out fully
+
+  await new Promise(r => setTimeout(r, minVisibleMs));
+
+  stepper.finish();
+  statusText.textContent = 'Done.';
+  video.src = OUTPUT_VIDEO_URL + '?t=' + Date.now();
+  video.hidden = false;
+  placeholder.hidden = true;
+  video.play().catch(() => {});
+
+  statusEl.classList.remove('loading');
+  btn.disabled = false;
+}
+
+btn.addEventListener('click', generate);
+</script>
+</body>
+</html>

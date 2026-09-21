@@ -1,0 +1,5 @@
+.git
+.claude
+demo/output
+demo/__pycache__
+**/__pycache__

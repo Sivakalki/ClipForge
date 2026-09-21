@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "clipforge-demo",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["demo/webapp/server.py"],
+      "port": 8000
+    },
+    {
+      "name": "clipforge-static",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "-d", "demo/webapp/static-site", "8080"],
+      "port": 8080
+    }
+  ]
+}

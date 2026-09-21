@@ -1,0 +1,14 @@
+{
+  "clip_id": "order_placing",
+  "file": "clips/order_placing.mp4",
+  "duration_s": 2.76,
+  "tags": [
+    {
+      "t_start": 0.0,
+      "t_end": 2.76,
+      "label": "Order Placed",
+      "confidence": 0.94
+    }
+  ],
+  "created_at": "2026-09-21T15:22:53Z"
+}
