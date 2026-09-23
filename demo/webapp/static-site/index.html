@@ -285,6 +285,41 @@
     color: var(--muted);
   }
   .clip-tile .tile-label b { color: var(--text); }
+  .npu-tags {
+    margin-top: 10px;
+    text-align: left;
+  }
+  .npu-tags .npu-label {
+    font-size: .66rem;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    color: var(--accent);
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .npu-tags .pill-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .tag-pill {
+    background: #1c1c26;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 3px 10px;
+    font-size: .72rem;
+    color: var(--text);
+    white-space: nowrap;
+  }
+  .tag-pill .conf { color: var(--muted); margin-left: 4px; }
+  .pipeline-note {
+    margin-top: 6px;
+    font-size: .78rem;
+    color: var(--accent);
+    text-align: center;
+  }
 </style>
 </head>
 <body>
@@ -292,7 +327,8 @@
   <header class="hero">
     <span class="badge">ClipForge &middot; Demo</span>
     <h1>Turn a script into a rough cut</h1>
-    <p>NPU-tagged clips + a script go in. A matched, edited rough cut comes out.</p>
+    <p>Clips are NPU-tagged on the iQOO 15, synced to a laptop via Office Kit,
+    then matched and rendered into a draft &mdash; fully offline, no cloud calls.</p>
   </header>
 
   <section class="panel" style="grid-column: 1 / -1;">
@@ -317,20 +353,41 @@
           <video src="raw/order_placing.mp4" muted loop playsinline controls></video>
         </div>
         <div class="tile-label"><b>1. Order Placed</b></div>
+        <div class="npu-tags">
+          <div class="npu-label">&#9889; NPU Generated Tags</div>
+          <div class="pill-row">
+            <span class="tag-pill">Order Placed<span class="conf">94%</span></span>
+          </div>
+        </div>
       </div>
       <div class="clip-tile">
         <div class="tile-frame">
           <video src="raw/order_received.mp4" muted loop playsinline controls></video>
         </div>
         <div class="tile-label"><b>2. Package Arrival</b></div>
+        <div class="npu-tags">
+          <div class="npu-label">&#9889; NPU Generated Tags</div>
+          <div class="pill-row">
+            <span class="tag-pill">Package Arrival<span class="conf">91%</span></span>
+          </div>
+        </div>
       </div>
       <div class="clip-tile">
         <div class="tile-frame">
           <video src="raw/unboxing.mp4" muted loop playsinline controls></video>
         </div>
         <div class="tile-label"><b>3. Unboxing</b></div>
+        <div class="npu-tags">
+          <div class="npu-label">&#9889; NPU Generated Tags</div>
+          <div class="pill-row">
+            <span class="tag-pill">Unboxing<span class="conf">93%</span></span>
+            <span class="tag-pill">Product Reveal<span class="conf">90%</span></span>
+          </div>
+        </div>
       </div>
     </div>
+    <p class="footage-note">Tags are generated on-device (NPU, NNAPI delegate) as each clip is
+      recorded &mdash; see <code>demo/tags/*.json</code> for the sidecar files.</p>
   </section>
 
   <section class="panel">
@@ -344,36 +401,50 @@
       <div class="step" data-step="0">
         <span class="dot"><span class="num">1</span><span class="check">&#10003;</span></span>
         <div class="step-text">
-          <div>Order placed &mdash; your hook plays here</div>
+          <div>Synced from iQOO 15 &mdash; via Office Kit</div>
           <div class="step-msg"></div>
         </div>
       </div>
       <div class="step" data-step="1">
         <span class="dot"><span class="num">2</span><span class="check">&#10003;</span></span>
         <div class="step-text">
-          <div>Package arrival &mdash; matched automatically</div>
+          <div>Order placed &mdash; your hook plays here</div>
           <div class="step-msg"></div>
         </div>
       </div>
       <div class="step" data-step="2">
         <span class="dot"><span class="num">3</span><span class="check">&#10003;</span></span>
         <div class="step-text">
+          <div>Package arrival &mdash; matched automatically</div>
+          <div class="step-msg"></div>
+        </div>
+      </div>
+      <div class="step" data-step="3">
+        <span class="dot"><span class="num">4</span><span class="check">&#10003;</span></span>
+        <div class="step-text">
           <div>Unboxing &mdash; matched automatically</div>
+          <div class="step-msg"></div>
+        </div>
+      </div>
+      <div class="step" data-step="4">
+        <span class="dot"><span class="num">5</span><span class="check">&#10003;</span></span>
+        <div class="step-text">
+          <div>Rendered as draft &mdash; on laptop</div>
           <div class="step-msg"></div>
         </div>
       </div>
     </div>
 
-    <button id="generate">Generate rough cut</button>
+    <button id="generate">Create draft version</button>
     <div id="status" class="status"><span class="spinner"></span><span id="status-text"></span></div>
   </section>
 
   <section class="panel preview">
     <div class="frame">
-      <div class="placeholder" id="placeholder">Your rough cut will appear here</div>
+      <div class="placeholder" id="placeholder">Your draft will appear here</div>
       <video id="video" controls playsinline></video>
     </div>
-    <div class="caption">Tagged clips &rarr; rule-based matcher &rarr; ffmpeg render</div>
+    <div class="caption">NPU tags (phone) &rarr; Office Kit sync &rarr; matched + rendered draft (laptop)</div>
   </section>
 </div>
 
@@ -411,14 +482,17 @@ uploadZone.addEventListener('click', showUploadDisabledNotice);
   })
 );
 
-// -- Per-step progress: lights up "Order placed / Package arrival /
-// Unboxing" one at a time with a short static message, so Generate reads
-// like a real pipeline working through each clip rather than one spinner.
+// -- Per-step progress: lights up the full phone-to-laptop pipeline one
+// step at a time (Office Kit sync -> clip matching -> laptop render) with
+// a short static message, so Create draft version reads like the real
+// two-device pipeline working through each stage rather than one spinner.
 const steps = Array.from(document.querySelectorAll('#clip-order .step'));
 const STEP_MESSAGES = [
+  'Received 3 NPU-tagged clips via Office Kit',
   'Matched to order_placing.mp4',
   'Matched to order_received.mp4 — resized to mobile dimensions',
   'Matched to unboxing.mp4 — subtitle added',
+  'Draft rendered locally on laptop (ffmpeg)',
 ];
 const STEP_INTERVAL_MS = 900;
 
@@ -473,7 +547,7 @@ async function generate() {
   await new Promise(r => setTimeout(r, minVisibleMs));
 
   stepper.finish();
-  statusText.textContent = 'Done.';
+  statusText.textContent = 'Draft created on laptop.';
   video.src = OUTPUT_VIDEO_URL + '?t=' + Date.now();
   video.hidden = false;
   placeholder.hidden = true;
