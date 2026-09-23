@@ -65,6 +65,50 @@
     margin: 0;
     font-size: .95rem;
   }
+  .pipeline-banner {
+    margin: 18px auto 0;
+    max-width: 720px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px 4px;
+    background: linear-gradient(90deg, rgba(124,92,255,.14), rgba(255,92,138,.14));
+    border: 1px solid rgba(124,92,255,.35);
+    border-radius: 14px;
+    padding: 16px 18px;
+  }
+  .pipeline-banner .stage {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 0 10px;
+  }
+  .pipeline-banner .stage-emoji { font-size: 1.3rem; }
+  .pipeline-banner .stage b {
+    font-size: .88rem;
+    color: var(--text);
+  }
+  .pipeline-banner .stage-sub {
+    font-size: .72rem;
+    color: var(--muted);
+  }
+  .pipeline-banner .arrow {
+    color: var(--accent);
+    font-size: 1.1rem;
+    flex-shrink: 0;
+  }
+  .pipeline-banner .offline-badge {
+    flex-basis: 100%;
+    text-align: center;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(124,92,255,.25);
+    font-size: .78rem;
+    font-weight: 600;
+    color: #6ee7a5;
+  }
   .panel {
     background: var(--panel);
     border: 1px solid var(--border);
@@ -212,6 +256,14 @@
     color: var(--muted);
     font-size: .85rem;
     padding: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+  .preview .placeholder .placeholder-icon {
+    font-size: 1.8rem;
+    opacity: .6;
   }
   .preview .caption {
     margin-top: 12px;
@@ -314,6 +366,26 @@
     white-space: nowrap;
   }
   .tag-pill .conf { color: var(--muted); margin-left: 4px; }
+  .tag-rows {
+    margin-top: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .tag-row {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    font-size: .7rem;
+  }
+  .tag-row .tag-icon { flex-shrink: 0; }
+  .tag-row .tag-key {
+    color: var(--muted);
+    min-width: 34px;
+    flex-shrink: 0;
+  }
+  .tag-row .tag-val { color: var(--text); }
+  .tag-row .tag-val.not-required { color: var(--muted); font-style: italic; }
   .pipeline-note {
     margin-top: 6px;
     font-size: .78rem;
@@ -327,8 +399,26 @@
   <header class="hero">
     <span class="badge">ClipForge &middot; Demo</span>
     <h1>Turn a script into a rough cut</h1>
-    <p>Clips are NPU-tagged on the iQOO 15, synced to a laptop via Office Kit,
-    then matched and rendered into a draft &mdash; fully offline, no cloud calls.</p>
+    <div class="pipeline-banner">
+      <div class="stage">
+        <span class="stage-emoji">&#128241;</span>
+        <b>NPU-tagged</b>
+        <span class="stage-sub">on iQOO 15</span>
+      </div>
+      <span class="arrow">&rarr;</span>
+      <div class="stage">
+        <span class="stage-emoji">&#128260;</span>
+        <b>Synced</b>
+        <span class="stage-sub">via Office Kit</span>
+      </div>
+      <span class="arrow">&rarr;</span>
+      <div class="stage">
+        <span class="stage-emoji">&#128187;</span>
+        <b>Rendered</b>
+        <span class="stage-sub">on laptop</span>
+      </div>
+      <div class="offline-badge">&#9889; Fully offline &mdash; no cloud calls</div>
+    </div>
   </header>
 
   <section class="panel" style="grid-column: 1 / -1;">
@@ -358,6 +448,11 @@
           <div class="pill-row">
             <span class="tag-pill">Order Placed<span class="conf">94%</span></span>
           </div>
+          <div class="tag-rows">
+            <div class="tag-row"><span class="tag-icon">&#9986;&#65039;</span><span class="tag-key">Trim</span><span class="tag-val">0.0s&ndash;3.0s</span></div>
+            <div class="tag-row"><span class="tag-icon">&#11036;&#65039;</span><span class="tag-key">Crop</span><span class="tag-val not-required">Not required &mdash; native 9:16</span></div>
+            <div class="tag-row"><span class="tag-icon">&#128269;</span><span class="tag-key">Zoom</span><span class="tag-val not-required">Not required</span></div>
+          </div>
         </div>
       </div>
       <div class="clip-tile">
@@ -369,6 +464,11 @@
           <div class="npu-label">&#9889; NPU Generated Tags</div>
           <div class="pill-row">
             <span class="tag-pill">Package Arrival<span class="conf">91%</span></span>
+          </div>
+          <div class="tag-rows">
+            <div class="tag-row"><span class="tag-icon">&#9986;&#65039;</span><span class="tag-key">Trim</span><span class="tag-val">8.0s&ndash;11.0s</span></div>
+            <div class="tag-row"><span class="tag-icon">&#11036;&#65039;</span><span class="tag-key">Crop</span><span class="tag-val">Portrait 9:16 &mdash; from 4K landscape</span></div>
+            <div class="tag-row"><span class="tag-icon">&#128269;</span><span class="tag-key">Zoom</span><span class="tag-val not-required">Not required</span></div>
           </div>
         </div>
       </div>
@@ -382,6 +482,11 @@
           <div class="pill-row">
             <span class="tag-pill">Unboxing<span class="conf">93%</span></span>
             <span class="tag-pill">Product Reveal<span class="conf">90%</span></span>
+          </div>
+          <div class="tag-rows">
+            <div class="tag-row"><span class="tag-icon">&#9986;&#65039;</span><span class="tag-key">Trim</span><span class="tag-val">3.0s&ndash;7.5s</span></div>
+            <div class="tag-row"><span class="tag-icon">&#11036;&#65039;</span><span class="tag-key">Crop</span><span class="tag-val not-required">Not required &mdash; native 9:16</span></div>
+            <div class="tag-row"><span class="tag-icon">&#128269;</span><span class="tag-key">Zoom</span><span class="tag-val">Recommended 2.0s&ndash;4.1s &mdash; product reveal</span></div>
           </div>
         </div>
       </div>
@@ -441,8 +546,8 @@
 
   <section class="panel preview">
     <div class="frame">
-      <div class="placeholder" id="placeholder">Your draft will appear here</div>
-      <video id="video" controls playsinline></video>
+      <div class="placeholder" id="placeholder"><span class="placeholder-icon">&#127916;</span>Your draft will appear here</div>
+      <video id="video" controls playsinline hidden></video>
     </div>
     <div class="caption">NPU tags (phone) &rarr; Office Kit sync &rarr; matched + rendered draft (laptop)</div>
   </section>
